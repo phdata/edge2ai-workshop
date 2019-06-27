@@ -30,7 +30,7 @@ In this workshop, you will build an end-to-end Machine Learning workflow.
 9. [Lab 8 - Spark Processing](#Lab 8 - Spark Processing)
 10. [Lab 9 - Kudu and Impala Analytics](#Lab 9 - Kudu and Impala Analytics)
 
-## Lab 0 - Initial Setup<a name="lab0"></a>
+## Lab 0 - Initial Setup
 
 1. Login to Azure with credentials generated from email.
 2. SSH into the cluster.
