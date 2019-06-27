@@ -20,15 +20,15 @@ In this workshop, you will build an end-to-end Machine Learning workflow.
 ### Workshop Flow:
 
 1. [Lab 0 - Initial Setup](#markdown-header-lab-0-initial-setup)
-2. [Lab 1 - CDSW: Train the model](##Lab 1 - CDSW: Train the model)
-3. [Lab 2 - Gateway Sensors Simulator and MQTT broker](#Lab 2 - Gateway Sensors Simulator and MQTT broker)
-4. [Lab 3 - MiNiFi Configuration on the Gateway](Lab 3 - MiNiFi Configuration on the Gateway)
-5. [Lab 4 - Configuring Edge Flow Management](#Lab 4 - Configuring Edge Flow Management)
-6. [Lab 5 - NiFi Workflow and Publish to Kafka](#Lab 5 - NiFi Workflow and Publish to Kafka)
-7. [Lab 6 - CDSW: Experiments and Model Selection](#Lab 6 - CDSW: Experiments and Model Selection)
-8. [Lab 7 - CDSW: Model Deployment](#Lab 7 - CDSW: Model Deployment)
-9. [Lab 8 - Spark Processing](#Lab 8 - Spark Processing)
-10. [Lab 9 - Kudu and Impala Analytics](#Lab 9 - Kudu and Impala Analytics)
+2. [Lab 1 - CDSW: Train the model](#markdown-header-lab-1-cdsw:-train-the-model)
+3. [Lab 2 - Gateway Sensors Simulator and MQTT broker](#markdown-header-lab-2-gateway-sensors-simulator-and-mqtt-broker)
+4. [Lab 3 - MiNiFi Configuration on the Gateway](#markdown-header-lab-3-minifi-configuration-on-the-gateway)
+5. [Lab 4 - Configuring Edge Flow Management](#markdown-header-lab-4-configuring-edge-flow-management)
+6. [Lab 5 - NiFi Workflow and Publish to Kafka](#markdown-header-lab-5-nifi-workflow-and-publish-to-kafka)
+7. [Lab 6 - CDSW: Experiments and Model Selection](#markdown-header-lab-6-cdsw:-experiments-and-model-selection)
+8. [Lab 7 - CDSW: Model Deployment](#markdown-header-lab-7-cdsw:-model-deployment)
+9. [Lab 8 - Spark Processing](#markdown-header-lab-8-spark-processing)
+10. [Lab 9 - Kudu and Impala Analytics](#markdown-header-lab-9-kudu-and-impala-analytics)
 
 ## Lab 0 - Initial Setup
 
