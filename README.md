@@ -19,8 +19,8 @@ In this workshop, you will build an end-to-end Machine Learning workflow.
 
 ### Workshop Flow:
 
-1. [Lab 0 - Initial Setup](#Lab 0 - Initial Setup)
-2. [Lab 1 - CDSW: Train the model](#Lab 1 - CDSW: Train the model)
+1. [Lab 0 - Initial Setup](##Lab 0 - Initial Setup)
+2. [Lab 1 - CDSW: Train the model](##Lab 1 - CDSW: Train the model)
 3. [Lab 2 - Gateway Sensors Simulator and MQTT broker](#Lab 2 - Gateway Sensors Simulator and MQTT broker)
 4. [Lab 3 - MiNiFi Configuration on the Gateway](Lab 3 - MiNiFi Configuration on the Gateway)
 5. [Lab 4 - Configuring Edge Flow Management](#Lab 4 - Configuring Edge Flow Management)
