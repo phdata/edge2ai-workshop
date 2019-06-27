@@ -19,11 +19,18 @@ In this workshop, you will build an end-to-end Machine Learning workflow.
 
 ### Workshop Flow:
 
-1. Lab 0 - Ensure connectivity to workshop endpoints
-2. Lab 1 - Train and Experiment Model in CDSW
-3. Lab 3 - As CDSW builds
+1. [Lab 0 - Initial Setup](#Lab 0 - Initial Setup)
+2. [Lab 1 - CDSW: Train the model](#Lab 1 - CDSW: Train the model)
+3. [Lab 2 - Gateway Sensors Simulator and MQTT broker](#Lab 2 - Gateway Sensors Simulator and MQTT broker)
+4. [Lab 3 - MiNiFi Configuration on the Gateway](Lab 3 - MiNiFi Configuration on the Gateway)
+5. [Lab 4 - Configuring Edge Flow Management](#Lab 4 - Configuring Edge Flow Management)
+6. [Lab 5 - NiFi Workflow and Publish to Kafka](#Lab 5 - NiFi Workflow and Publish to Kafka)
+7. [Lab 6 - CDSW: Experiments and Model Selection](#Lab 6 - CDSW: Experiments and Model Selection)
+8. [Lab 7 - CDSW: Model Deployment](#Lab 7 - CDSW: Model Deployment)
+9. [Lab 8 - Spark Processing](#Lab 8 - Spark Processing)
+10. [Lab 9 - Kudu and Impala Analytics](#Lab 9 - Kudu and Impala Analytics)
 
-## Lab 0 - Initial setup
+## Lab 0 - Initial Setup
 
 1. Login to Azure with credentials generated from email.
 2. SSH into the cluster.
@@ -422,9 +429,13 @@ TBLPROPERTIES ('kudu.num_tablet_replicas' = '1');
 
 ![](./images/image28.png)
 
-Now you can configure and run the Spark Streaming job. You need here the CDSW Access Key you saved in Lab 2.
+**Step 2**: Create Spark Job
 
-Open a second Terminal and SSH into the VM. The first is running the sensor data simulator, so you can't use it.
+Now you can configure and run the Spark Streaming job. You will need the CDSW Access Key you saved from the previous lab.
+
+Open a second Terminal and SSH into the Gateway Node. The first is running the sensor data simulator, so you can't use it or else you will stop the data from flowing in.
+
+In the second terminal run the following commands:
 
 ```
 $ sudo su -
@@ -440,14 +451,14 @@ $ rm -rf ~/.m2 ~/.ivy2/
 $ spark-submit --master local[2] --jars kudu-spark2_2.11-1.9.0.jar,spark-core_2.11-1.5.2.logging.jar --packages org.apache.spark:spark-streaming-kafka_2.11:1.6.3 spark.iot.py
 ```
 
-Please note: you might have to use `spark2-submit` if you're running this demo out of a CDH 5 cluster.
+**Note**: you might have to use `spark2-submit` if you're running this demo out of a CDH 5 cluster.
 
-Spark Streaming will flood your screen with log messages, however, at a 5 seconds interval, you should be able to spot a table: these are the messages that were consumed from Kafka and processed by Spark. YOu can configure Spark for a smaller time window, however, for this exercise 5 seconds is sufficient.
+Spark Streaming will flood your screen with log messages, however, at a 5 seconds interval, you should be able to spot a table: these are the messages that were consumed from Kafka and processed by Spark. Yu can configure Spark for a smaller time window, however, for this exercise 5 seconds is sufficient.
 
 ![](./images/image20.png)
 
 
-## Lab 8 - Fast analytics on fast data with Kudu and Impala
+## Lab 9 - Kudu and Impala Analytics
 
 In this lab, you will run some SQL queries using the Impala engine. You can run a report to inform you which machines are likely to break in the near future.
 
@@ -457,7 +468,7 @@ Login into Hue, and run the following statement in the Impala Query
 select sensor_id, sensor_ts from sensors where is_healthy = 0;
 ```
 
-Run a few times a SQL statement to count all rows in the table to confirm the latest inserts are always picked up by Impala. This allows you to build real-time reports for fast action.
+Run a few times a SQL statement to count all rows in the table to confirm the latest inserts are always picked up by Impala. This allows you to build real-time reports to act on when it is predicted a machine might break.
 
 ![](./images/image5.png)
 
