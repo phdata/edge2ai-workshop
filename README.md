@@ -2,7 +2,7 @@
 
 ## Intro
 
-In this workshop, you will build an end-to-end Machine Learning workflow.
+In this workshop, you will build an end-to-end Machine Learning workflow following the principles set by a typical data ingestion pipeline.
 
 ![](./images/ml_application_process.png)
 
@@ -17,20 +17,20 @@ In this workshop, you will build an end-to-end Machine Learning workflow.
 7. The final stage of the workshop is to monitor the flow via CDSW monitoring and querying results with [**Apache Impala**](https://impala.apache.org/).
 
 
-### Workshop Flow:
+### Workshop Table of Contents:
 
-1. [Lab 0 - Initial Setup](#markdown-header-lab-0-initial-setup)
-2. [Lab 1 - CDSW: Train the model](#markdown-header-lab-1-cdsw-train-the-model)
-3. [Lab 2 - Gateway Sensors Simulator and MQTT broker](#markdown-header-lab-2-gateway-sensors-simulator-and-mqtt-broker)
-4. [Lab 3 - MiNiFi Configuration on the Gateway](#markdown-header-lab-3-minifi-configuration-on-the-gateway)
-5. [Lab 4 - Configuring Edge Flow Management](#markdown-header-lab-4-configuring-edge-flow-management)
-6. [Lab 5 - NiFi Workflow and Publish to Kafka](#markdown-header-lab-5-nifi-workflow-and-publish-to-kafka)
-7. [Lab 6 - CDSW: Experiments and Model Selection](#markdown-header-lab-6-cdsw-experiments-and-model-selection)
-8. [Lab 7 - CDSW: Model Deployment](#markdown-header-lab-7-cdsw-model-deployment)
-9. [Lab 8 - Spark Processing](#markdown-header-lab-8-spark-processing)
-10. [Lab 9 - Kudu and Impala Analytics](#markdown-header-lab-9-kudu-and-impala-analytics)
+- [Lab 1 - Initial Setup](#markdown-header-lab-1-initial-setup)
+- [Lab 2 - CDSW: Train the model](#markdown-header-lab-2-cdsw-train-the-model)
+- [Lab 3 - Gateway Sensors Simulator and MQTT broker](#markdown-header-lab-3-gateway-sensors-simulator-and-mqtt-broker)
+- [Lab 4 - MiNiFi Configuration on the Gateway](#markdown-header-lab-4-minifi-configuration-on-the-gateway)
+- [Lab 5 - Configuring Edge Flow Management](#markdown-header-lab-5-configuring-edge-flow-management)
+- [Lab 6 - NiFi Workflow and Publish to Kafka](#markdown-header-lab-6-nifi-workflow-and-publish-to-kafka)
+- [Lab 7 - CDSW: Experiments and Model Selection](#markdown-header-lab-7-cdsw-experiments-and-model-selection)
+- [Lab 8 - CDSW: Model Deployment](#markdown-header-lab-8-cdsw-model-deployment)
+- [Lab 9 - Spark Processing](#markdown-header-lab-9-spark-processing)
+- [Lab 10 - Kudu and Impala Analytics](#markdown-header-lab-10-kudu-and-impala-analytics)
 
-## Lab 0 - Initial Setup
+## Lab 1 - Initial Setup
 
 1. Login to Azure with credentials generated from email.
 2. SSH into the cluster.
@@ -55,11 +55,11 @@ When logging into **CDSW** it is required to create a new user, please ensure th
 
 ![](./images/cdsw_login.png)
 
-## Lab 1 - CDSW: Train the model
+## Lab 2 - CDSW: Train the model
 
-In this and the following lab, you will wear the hat of a Data Scientist. You will develop the code to build the model, train it several times, and finally deploy the model to Production. All within 60 minutes!
+In this and the following labs, you will wear the hat of a Data Scientist. You will develop the code to build the model, train it several times, and finally deploy the model to Production. All within 60 minutes!
 
-**STEP 0** : Configure CDSW
+**STEP 1** : Configure CDSW
 
 Navigate to the CDSW **Admin** page to fine tune the environment:
 - in the **Engines** tab, add in _Engines Profiles_ a new engine (docker image) with 2 vCPUs and 4 GB RAM, while deleting the default engine.
@@ -72,7 +72,7 @@ Navigate to the CDSW **Admin** page to fine tune the environment:
 
 **Note**: this env variable is not required for a CDH 5 cluster.
 
-**STEP 1** : Create the project
+**STEP 2** : Create the project
 
 Return to the main page and click on **New Project**, using this GitHub project as the source: `https://github.com/phdata/predictive-maintenance`.
 
@@ -83,7 +83,7 @@ Now that your project has been created, click on **Open Workbench** and start a 
 
 ![](./images/image19.png)
 
-**NOTE**: Chrome users should not have issues here but IE users have had issues with the interactivity of CDSW because it will look like the workbench is always being created.
+**NOTE**: Chrome users shouldn't have issues here but IE users have had issues with the interactivity of CDSW because it will look like the workbench is always being created (red line) and never change to an "up" state (green line) without a manual refresh.
 
 Once the Engine is ready, run the following command to install some required libraries:
 ```
@@ -96,11 +96,9 @@ The project comes with a historical dataset. Copy this dataset into HDFS:
 
 ![](./images/image22.png)
 
-You're now ready to run the Experiment to train the model on your historical data.
+You're now ready to run Experiment to train the model on your historical data. At this point you can stop the Workbench Process.
 
-You can stop the Workbench Process at this point.
-
-**STEP 2** : Examine `cdsw.iot_exp.py`
+**STEP 3** : Examine `cdsw.iot_exp.py`
 
 Open the file `cdsw.iot_exp.py`. This is a python program that builds a model to predict machine failure (the likelihood that this machine is going to fail). There is a dataset available on hdfs with customer data, including a failure indicator field.
 
@@ -132,7 +130,7 @@ cdsw.track_metric("ap", ap)
 
 These indicators will show up later in the **Experiments** dashboard.
 
-**STEP 3** : Run the experiment for the first time
+**STEP 4** : Run the experiment for the first time
 
 Now, run the experiment using the following parameters:
 ```
@@ -140,7 +138,7 @@ numTrees = 20 numDepth = 20
 ```
 From the menu, select `Run -> Run Experiments...`. Now, in the background, the Data Science Workbench environment will spin up a new docker container, where this program will run.
 
-**NOTE**: The first run will take 20-30 minutes to build the container it will run in. It will also not show up until you navigate to the **Experiments** page of CDSW.
+**NOTE**: The first run will take 20-30 minutes to build the container it will execute in. It will also not show up until you navigate to the **Experiments** page of CDSW. Please move forward to [Lab 3](#markdown-header-lab-3-gateway-sensors-simulator-and-mqtt-broker) as this process builds.
 
 ![](./images/image23.png)
 
@@ -156,9 +154,9 @@ In case your status indicates ‘Success’, you should be able to see the auroc
 In this example, ~0.8478. Not bad, but maybe there are better hyper parameter values available.
 
 
-## Lab 2 - Gateway Sensors Simulator and MQTT broker
+## Lab 3 - Gateway Sensors Simulator and MQTT broker
 
-In this lab you will run a simple Python script that simulates IoT sensor data from hypothetical machines, and send the data to a MQTT broker, [mosquitto](https://mosquitto.org/). The gateway host is connected to many and different type of sensors, but they generally all share the same transport protocol, MQTT.
+In this lab you will run a simple Python script that simulates IoT sensor data from hypothetical machines and send the data to a MQTT broker, [mosquitto](https://mosquitto.org/). The gateway host is connected to many and different type of sensors, but they generally all share the same transport protocol, MQTT.
 
 **Step 1**: Congifgure MQTT Broker
 
@@ -174,6 +172,8 @@ $ systemctl start mosquitto
 **Step 2**: Clone Project and Start Sensor Simulator
 
 We will then clone this repo, then run the simulator to send sensor data to mosquitto.
+
+**LINK to phData Repository**
 ```
 $ git clone https://github.com/fabiog1901/IoT-predictive-maintenance.git
 $ mv IoT-predictive-maintenance/mqtt.* ~
@@ -191,7 +191,7 @@ iot: {"sensor_id": 70, "sensor_ts": 1556758807751841, "sensor_0": 2, "sensor_1":
 You can stop the simulator now, with Ctrl+C.
 
 
-## Lab 3 - MiNiFi Configuration on the Gateway
+## Lab 4 - MiNiFi Configuration on the Gateway
 
 MiNiFi is installed on the gateway host. In this lab you will configure and run MiNiFi to read from the mosquitto broker and forward to the NiFi cluster, but it's only in the next lab that you will provide the flow to execute.
 
@@ -216,7 +216,7 @@ If any issues persist you can check the logs to confirm all is performing as exp
 $ cat /opt/cloudera/cem/minifi/logs/minifi-app.log
 ```
 
-## Lab 4 - Configuring Edge Flow Management
+## Lab 5 - Configuring Edge Flow Management
 
 [Cloudera Edge Flow Management](https://www.cloudera.com/products/cdf/cem.html) gives you a visual representation of all MiNiFi agents across your enterprise. This allows you to monitor status, update the pipeline configuration for each type of one workflow, and integrates with version control thanks to [**NiFi Registry**](https://nifi.apache.org/registry.html). In this lab, you will create a MiNiFi flow and publish it to the MiNiFi agent to transmit the MQTT messages.
 
@@ -294,7 +294,7 @@ $ python mqtt.iot_simulator.py mqtt.iot.config
 ![](./images/image29.png)
 
 
-## Lab 5 - NiFi Workflow and Publish to Kafka
+## Lab 6 - NiFi Workflow and Publish to Kafka
 
 In this lab, you will create a NiFi flow to receive the data from the MiNiFi gateway and push it to **Kafka**.
 
@@ -314,7 +314,7 @@ Connect the Input Port to the PublishKafka processor by dragging the destination
 
 You can add more processors as needed to process, split, duplicate or re-route your FlowFiles to all other destinations and processors but for the purpose of this workshop we are complete with the NiFi workflow.
 
-## Lab 6 - CDSW: Experiments and Model Selection
+## Lab 7 - CDSW: Experiments and Model Selection
 
 **STEP 1** : Re-run the Experiment with Different Parameters
 
@@ -336,7 +336,7 @@ Select the run number with the best predictive value, in this case, experiment 2
 ![](./images/image13.png)
 ![](./images/image1.png)
 
-## Lab 7 - CDSW: Model Deployment
+## Lab 8 - CDSW: Model Deployment
 
 In this section we will deploy the model we selected in the previous lab by utilizing the **Models** section of CDSW.
 
@@ -391,7 +391,7 @@ Now, lets change the input parameters and call the predict function again. Put t
 With these input parameters, the model returns 0, which mean that the machine is likely to break. Take a note of the **AccessKey** as you will need this for lab 8.
 
 
-## Lab 8 - Spark Processing
+## Lab 9 - Spark Processing
 
 In this lab we will be using the Spark Streaming processing framework to process the messages streaming into Kafka. This means we will be consuming Kafka messages streaming in from the edge device, sending the contents of that data to the ML Model API, and saving the predictions to Kudu. These predictions tell us whether or not our model anticipates breakage and we will be able to leverage Kudu to analyze these results.
 
@@ -458,7 +458,7 @@ Spark Streaming will flood your screen with log messages, however, at a 5 second
 ![](./images/image20.png)
 
 
-## Lab 9 - Kudu and Impala Analytics
+## Lab 10 - Kudu and Impala Analytics
 
 In this lab, you will run some SQL queries using the Impala engine. You can run a report to inform you which machines are likely to break in the near future.
 
