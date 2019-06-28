@@ -6,6 +6,15 @@ In this workshop, you will build an end-to-end Machine Learning workflow followi
 
 ![](./images/ml_application_process.png)
 
+### Workshop Requirements:
+
+- Basic Hadoop knowledge
+- Basic Machine Learning knowledge
+- Knowledge on how to use SSH on Windows Putty or Mac’s Terminal.
+- On Windows have PuTTy installed or install OpenSSH for PowerShell, instruction here: https://docs.microsoft.com/en-us/windows-server/administration/openssh/openssh_install_firstuse
+- Modern Operating; Windows 10 and latest MacOS version
+- Modern web browser: Chrome or Firefox (not IE)
+
 ### Workshop Process:
 
 1. On a simulated edge device we will run a simulator to send IOT sensor data that sends data to the MQTT broker.
