@@ -28,16 +28,16 @@ In this workshop, you will build an end-to-end Machine Learning workflow followi
 
 ### Workshop Table of Contents:
 
-- [Lab 1 - Initial Setup](#markdown-header-lab-1-initial-setup)
-- [Lab 2 - CDSW: Train the model](#markdown-header-lab-2-cdsw-train-the-model)
-- [Lab 3 - Gateway Sensors Simulator and MQTT broker](#markdown-header-lab-3-gateway-sensors-simulator-and-mqtt-broker)
-- [Lab 4 - MiNiFi Configuration on the Gateway](#markdown-header-lab-4-minifi-configuration-on-the-gateway)
-- [Lab 5 - Configuring Edge Flow Management](#markdown-header-lab-5-configuring-edge-flow-management)
-- [Lab 6 - NiFi Workflow and Publish to Kafka](#markdown-header-lab-6-nifi-workflow-and-publish-to-kafka)
-- [Lab 7 - CDSW: Experiments and Model Selection](#markdown-header-lab-7-cdsw-experiments-and-model-selection)
-- [Lab 8 - CDSW: Model Deployment](#markdown-header-lab-8-cdsw-model-deployment)
-- [Lab 9 - Spark Processing](#markdown-header-lab-9-spark-processing)
-- [Lab 10 - Kudu and Impala Analytics](#markdown-header-lab-10-kudu-and-impala-analytics)
+- [Lab 1 - Initial Setup](#lab-1---initial-setup)
+- [Lab 2 - CDSW: Train the model](#lab-2---cdsw-train-the-model)
+- [Lab 3 - Gateway Sensors Simulator and MQTT broker](#lab-3---gateway-sensors-simulator-and-mqtt-broker)
+- [Lab 4 - MiNiFi Configuration on the Gateway](#lab-4---minifi-configuration-on-the-gateway)
+- [Lab 5 - Configuring Edge Flow Management](#lab---5-configuring-edge-flow-management)
+- [Lab 6 - NiFi Workflow and Publish to Kafka](#lab---6-nifi-workflow-and-publish-to-kafka)
+- [Lab 7 - CDSW: Experiments and Model Selection](#lab---7-cdsw-experiments-and-model-selection)
+- [Lab 8 - CDSW: Model Deployment](#lab---8-cdsw-model-deployment)
+- [Lab 9 - Spark Processing](#lab---9-spark-processing)
+- [Lab 10 - Kudu and Impala Analytics](#lab---10-kudu-and-impala-analytics)
 
 ## Lab 1 - Initial Setup
 
@@ -77,33 +77,29 @@ Navigate to the CDSW **Admin** page to fine tune the environment:
    HADOOP_CONF_DIR = /etc/hadoop/conf/
    ```
 
-![](./images/image16.png)
+![](./images/cdsw_variables.png)
 
 **Note**: this env variable is not required for a CDH 5 cluster.
 
 **STEP 2** : Create the project
 
-Return to the main page and click on **New Project**, using this GitHub project as the source: `https://github.com/phdata/predictive-maintenance`.
+Return to the main page and click on **New Project**, using this GitHub project as the source: `https://github.com/phdata/edge2ai-workshop`.
 
-**CHANGE HERE URL and Picture**
-![](./images/image8.png)
+![](./images/cdsw_new_project.png)
 
 Now that your project has been created, click on **Open Workbench** and start a Python3 Session with 2 vCPU/ 4 GiB Memory
 
-![](./images/image19.png)
+![](./images/cdsw_create_session.png)
 
 **NOTE**: Chrome users shouldn't have issues here but IE users have had issues with the interactivity of CDSW because it will look like the workbench is always being created (red line) and never change to an "up" state (green line) without a manual refresh.
 
-Once the Engine is ready, run the following command to install some required libraries:
+Once the Engine is ready, run the following command to install some required libraries and copy the historical dataset into HDFS:
 ```
 !pip3 install --upgrade pip scikit-learn
-```
-The project comes with a historical dataset. Copy this dataset into HDFS:
-```
 !hdfs dfs -put data/historical_iot.txt /user/$HADOOP_USER_NAME
 ```
 
-![](./images/image22.png)
+![](./images/cdsw_project_prereqs.png)
 
 You're now ready to run Experiment to train the model on your historical data. At this point you can stop the Workbench Process.
 
@@ -147,18 +143,19 @@ numTrees = 20 numDepth = 20
 ```
 From the menu, select `Run -> Run Experiments...`. Now, in the background, the Data Science Workbench environment will spin up a new docker container, where this program will run.
 
-**NOTE**: The first run will take 20-30 minutes to build the container it will execute in. It will also not show up until you navigate to the **Experiments** page of CDSW. Please move forward to [Lab 3](#markdown-header-lab-3-gateway-sensors-simulator-and-mqtt-broker) as this process builds.
+**NOTE**: The first run will take 20-30 minutes to build the container it will execute in. It will also not show up until you navigate to the **Experiments** page of CDSW. Please move forward to [Lab 3](#lab---3-gateway-sensors-simulator-and-mqtt-broker) as this process builds.
 
-![](./images/image23.png)
+![](./images/cdsw_run_experiment.png)
+![](./images/cdsw_start_experiment.png)
 
 
 If the Status indicates ‘Running’, you have to wait till the run is completed. In case the status is ‘Build Failed’ or ‘Failed’, check the log information. This is accessible by clicking on the run number of your experiments. There you can find the session log, as well as the build information.
 
-![](./images/image15.png)
+![](./images/cdsw_monitor_experiment.png)
 
 In case your status indicates ‘Success’, you should be able to see the auroc (Area Under the Curve) model quality indicator. It might be that this value is hidden by the CDSW user interface. In that case, click on the ‘3 metrics’ links, and select the auroc field. It might be needed to de-select some other fields, since the interface can only show 3 metrics at the same time.
 
-![](./images/image12.png)
+![](./images/cdsw_experiment_success.png)
 
 In this example, ~0.8478. Not bad, but maybe there are better hyper parameter values available.
 
@@ -167,26 +164,25 @@ In this example, ~0.8478. Not bad, but maybe there are better hyper parameter va
 
 In this lab you will run a simple Python script that simulates IoT sensor data from hypothetical machines and send the data to a MQTT broker, [mosquitto](https://mosquitto.org/). The gateway host is connected to many and different type of sensors, but they generally all share the same transport protocol, MQTT.
 
-**Step 1**: Congifgure MQTT Broker
+**Step 1**: Configure MQTT Broker
 
 To configure the mosquitto broker we need to SSH into the VM, then install required libs and start the mosquitto broker
 ```
-$ sudo su -
-$ yum install -y mosquitto
-$ pip install paho-mqtt
-$ systemctl enable mosquitto
-$ systemctl start mosquitto
+sudo su -
+yum install -y mosquitto
+pip install paho-mqtt
+systemctl enable mosquitto
+systemctl start mosquitto
 ```
 
 **Step 2**: Clone Project and Start Sensor Simulator
 
 We will then clone this repo, then run the simulator to send sensor data to mosquitto.
 
-**LINK to phData Repository**
 ```
-$ git clone https://github.com/fabiog1901/IoT-predictive-maintenance.git
-$ mv IoT-predictive-maintenance/mqtt.* ~
-$ python mqtt.iot_simulator.py mqtt.iot.config
+git clone https://github.com/phdata/edge2ai-workshop
+mv edge2ai-workshop/mqtt.* ~
+python mqtt.iot_simulator.py mqtt.iot.config
 ```
 
 You should see an output similar to the below:
@@ -208,21 +204,24 @@ MiNiFi is installed on the gateway host. In this lab you will configure and run 
 
 Download the NiFi MQTT Processor to read from mosquitto
 ```
-$ cd ~
-$ wget http://central.maven.org/maven2/org/apache/nifi/nifi-mqtt-nar/1.8.0/nifi-mqtt-nar-1.8.0.nar -P /opt/cloudera/cem/minifi/lib
-$ chown root:root /opt/cloudera/cem/minifi/lib/nifi-mqtt-nar-1.8.0.nar
-$ chmod 660 /opt/cloudera/cem/minifi/lib/nifi-mqtt-nar-1.8.0.nar
+cd ~
+wget http://central.maven.org/maven2/org/apache/nifi/nifi-mqtt-nar/1.8.0/nifi-mqtt-nar-1.8.0.nar -P /opt/cloudera/cem/minifi/lib
+chown root:root /opt/cloudera/cem/minifi/lib/nifi-mqtt-nar-1.8.0.nar
+chmod 660 /opt/cloudera/cem/minifi/lib/nifi-mqtt-nar-1.8.0.nar
 ```
 
 **Step 2**: Start MiNiFi
 
 You can now start the MiNiFi agent
+
 ```
-$ systemctl start minifi
+systemctl start minifi
 ```
+
 If any issues persist you can check the logs to confirm all is performing as expected, this would be necessary if this agent is not heartbeating back to the Edge Flow Manager (next lab):
+
 ```
-$ cat /opt/cloudera/cem/minifi/logs/minifi-app.log
+cat /opt/cloudera/cem/minifi/logs/minifi-app.log
 ```
 
 ## Lab 5 - Configuring Edge Flow Management
@@ -238,6 +237,7 @@ Before we can start tracking workflows in MiNiFi (via EFM) or NiFi we need to co
   - Wrench in top right -> Click "New Bucket"
   - Create a new bucket named "IoT" **<- Case Sensitive!**
 
+![](./images/efm_admin.png)
 ![](./images/image25.png)
 
 **Step 2**: EFM Configuration
@@ -296,8 +296,9 @@ If successful, you will see the Flow details in the NiFi Registry.
 **Step 5**: Test MiNiFi Agent
 
 At this point, you can test the edge flow up until NiFi. Start the simulator again and confirm you can see the messages queued in NiFi.
+
 ```
-$ python mqtt.iot_simulator.py mqtt.iot.config
+python mqtt.iot_simulator.py mqtt.iot.config
 ```
 
 ![](./images/image29.png)
@@ -328,12 +329,14 @@ You can add more processors as needed to process, split, duplicate or re-route y
 **STEP 1** : Re-run the Experiment with Different Parameters
 
 Go back to the Workbench and run the experiment 2 more times and try different values for NumTrees and NumDepth. Try the following values:
+
 ```
 NumTrees NumDepth
 15       25
 25       20
 20       25
 ```
+
 When all runs have completed successfully, check which parameters had the best quality (best predictive value). This is represented by the highest ‘area under the curve’, auroc metric.
 
 ![](./images/image27.png)
@@ -356,6 +359,7 @@ Open the project you created in the previous lab, and examine the file in the Wo
 There is a predict definition which is the function that calls the model, using features, and will return a result variable.
 
 Before deploying the model, try it out in the Workbench: launch a Python3 engine and run the code in file `cdsw.iot_model.py`. Then call the `predict()` method from the prompt:
+
 ```
 predict({"feature": "0, 65, 0, 137, 21.95, 83, 19.42, 111, 9.4, 6, 3.43, 4"})
 ```
@@ -392,11 +396,13 @@ The green color with success is telling that our REST call to the model is techn
 ![](./images/image11.png)
 
 Now, lets change the input parameters and call the predict function again. Put the following values in the Input field:
+
 ```
 {
   "feature": "0, 95, 0, 88, 26.62, 75, 21.05, 115, 8.65, 5, 3.32, 3"
 }
 ```
+
 With these input parameters, the model returns 0, which mean that the machine is likely to break. Take a note of the **AccessKey** as you will need this for lab 8.
 
 
@@ -447,17 +453,17 @@ Open a second Terminal and SSH into the Gateway Node. The first is running the s
 In the second terminal run the following commands:
 
 ```
-$ sudo su -
-$ ACCESS_KEY=<put here your cdsw model access key>
-$ PUBLIC_IP=`curl https://api.ipify.org/`
-$ mv ~/IoT-predictive-maintenance/spark.iot.py ~
-$ sed -i "s/YourHostname/`hostname -f`/" spark.iot.py
-$ sed -i "s/YourCDSWDomain/cdsw.$PUBLIC_IP.nip.io/" spark.iot.py
-$ sed -i "s/YourAccessKey/$ACCESS_KEY/" spark.iot.py
-$ wget  http://central.maven.org/maven2/org/apache/kudu/kudu-spark2_2.11/1.9.0/kudu-spark2_2.11-1.9.0.jar
-$ wget https://raw.githubusercontent.com/swordsmanliu/SparkStreamingHbase/master/lib/spark-core_2.11-1.5.2.logging.jar
-$ rm -rf ~/.m2 ~/.ivy2/
-$ spark-submit --master local[2] --jars kudu-spark2_2.11-1.9.0.jar,spark-core_2.11-1.5.2.logging.jar --packages org.apache.spark:spark-streaming-kafka_2.11:1.6.3 spark.iot.py
+sudo su -
+ACCESS_KEY=<put here your cdsw model access key>
+PUBLIC_IP=`curl https://api.ipify.org/`
+mv ~/IoT-predictive-maintenance/spark.iot.py ~
+sed -i "s/YourHostname/`hostname -f`/" spark.iot.py
+sed -i "s/YourCDSWDomain/cdsw.$PUBLIC_IP.nip.io/" spark.iot.py
+sed -i "s/YourAccessKey/$ACCESS_KEY/" spark.iot.py
+wget  http://central.maven.org/maven2/org/apache/kudu/kudu-spark2_2.11/1.9.0/kudu-spark2_2.11-1.9.0.jar
+wget https://raw.githubusercontent.com/swordsmanliu/SparkStreamingHbase/master/lib/spark-core_2.11-1.5.2.logging.jar
+rm -rf ~/.m2 ~/.ivy2/
+spark-submit --master local[2] --jars kudu-spark2_2.11-1.9.0.jar,spark-core_2.11-1.5.2.logging.jar --packages org.apache.spark:spark-streaming-kafka_2.11:1.6.3 spark.iot.py
 ```
 
 **Note**: you might have to use `spark2-submit` if you're running this demo out of a CDH 5 cluster.
@@ -497,18 +503,21 @@ Run a few times a SQL statement to count all rows in the table to confirm the la
   Delete the agent manifest manually using the EFM API:
 
   Verify each class has the same agent manifest ID:
+
   ```
   http://hostname:10080/efm/api/agent-classes
   [{"name":"iot1","agentManifests":["agent-manifest-id"]},{"name":"iot4","agentManifests":["agent-manifest-id"]}]
   ```
 
   Confirm the manifest doesn't have the NAR you installed
+
   ```
   http://hostname:10080/efm/api/agent-manifests?class=iot4
   [{"identifier":"agent-manifest-id","agentType":"minifi-java","version":"1","buildInfo":{"timestamp":1556628651811,"compiler":"JDK 8"},"bundles":[{"group":"default","artifact":"system","version":"unversioned","componentManifest":{"controllerServices":[],"processors":
   ```
 
   Call the API
+
   ```
   http://hostname:10080/efm/swagger/
   ```
