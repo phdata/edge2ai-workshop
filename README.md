@@ -11,7 +11,7 @@ In this workshop, you will build an end-to-end Machine Learning workflow followi
 - Basic Hadoop knowledge
 - Basic Machine Learning knowledge
 - Knowledge on how to use SSH on Windows Putty or Mac’s Terminal.
-- On Windows have PuTTy installed or install OpenSSH for PowerShell, instruction here: https://docs.microsoft.com/en-us/windows-server/administration/openssh/openssh_install_firstuse
+  - On Windows have PuTTy installed or install OpenSSH for PowerShell, instruction here: https://docs.microsoft.com/en-us/windows-server/administration/openssh/openssh_install_firstuse
 - Modern Operating; Windows 10 and latest MacOS version
 - Modern web browser: Chrome or Firefox (not IE)
 
@@ -31,19 +31,17 @@ In this workshop, you will build an end-to-end Machine Learning workflow followi
 - [Lab 1 - Initial Setup](#lab-1---initial-setup)
 - [Lab 2 - CDSW: Train the model](#lab-2---cdsw-train-the-model)
 - [Lab 3 - Gateway Sensors Simulator and MQTT broker](#lab-3---gateway-sensors-simulator-and-mqtt-broker)
-- [Lab 4 - MiNiFi Configuration on the Gateway](#lab-4---minifi-configuration-on-the-gateway)
-- [Lab 5 - Configuring Edge Flow Management](#lab---5-configuring-edge-flow-management)
-- [Lab 6 - NiFi Workflow and Publish to Kafka](#lab---6-nifi-workflow-and-publish-to-kafka)
-- [Lab 7 - CDSW: Experiments and Model Selection](#lab---7-cdsw-experiments-and-model-selection)
-- [Lab 8 - CDSW: Model Deployment](#lab---8-cdsw-model-deployment)
-- [Lab 9 - Spark Processing](#lab---9-spark-processing)
-- [Lab 10 - Kudu and Impala Analytics](#lab---10-kudu-and-impala-analytics)
+- [Lab 4 - Configuring Edge Flow Management](#lab---4-configuring-edge-flow-management)
+- [Lab 5 - NiFi Workflow and Publish to Kafka](#lab---5-nifi-workflow-and-publish-to-kafka)
+- [Lab 6 - CDSW: Experiments and Model Selection](#lab---6-cdsw-experiments-and-model-selection)
+- [Lab 7 - CDSW: Model Deployment](#lab---7-cdsw-model-deployment)
+- [Lab 8 - Spark Processing](#lab---8-spark-processing)
+- [Lab 9 - Kudu and Impala Analytics](#lab---9-kudu-and-impala-analytics)
 
 ## Lab 1 - Initial Setup
 
-1. Login to Azure with credentials generated from email.
-2. SSH into the cluster.
-3. Login into the necessary GUI interfaces in separate tabs.
+1. SSH into the cluster.
+2. Login into the necessary GUI interfaces in separate tabs.
 
   - Cloudera Manager:  7180 - User: admin Pass: admin
   - Edge Flow Manager: 10080/efm/ui - No Login
@@ -157,32 +155,20 @@ In case your status indicates ‘Success’, you should be able to see the auroc
 
 ![](./images/cdsw_experiment_success.png)
 
-In this example, ~0.8478. Not bad, but maybe there are better hyper parameter values available.
+In this example, ~0.8053. Not bad, but maybe there are better hyper parameter values available.
 
 
 ## Lab 3 - Gateway Sensors Simulator and MQTT broker
 
 In this lab you will run a simple Python script that simulates IoT sensor data from hypothetical machines and send the data to a MQTT broker, [mosquitto](https://mosquitto.org/). The gateway host is connected to many and different type of sensors, but they generally all share the same transport protocol, MQTT.
 
-**Step 1**: Configure MQTT Broker
+**Step 1**: Start the Sensor Simulator
 
-To configure the mosquitto broker we need to SSH into the VM, then install required libs and start the mosquitto broker
+As part of the node creation process the MQTT broker was installed and configured, now it is time to start the simulation with the following commands:
+
 ```
 sudo su -
-yum install -y mosquitto
-pip install paho-mqtt
-systemctl enable mosquitto
-systemctl start mosquitto
-```
-
-**Step 2**: Clone Project and Start Sensor Simulator
-
-We will then clone this repo, then run the simulator to send sensor data to mosquitto.
-
-```
-git clone https://github.com/phdata/edge2ai-workshop
-mv edge2ai-workshop/mqtt.* ~
-python mqtt.iot_simulator.py mqtt.iot.config
+python ~/mqtt.iot_simulator.py ~/mqtt.iot.config
 ```
 
 You should see an output similar to the below:
@@ -193,38 +179,9 @@ iot: {"sensor_id": 24, "sensor_ts": 1556758797738580, "sensor_0": 1, "sensor_1":
 iot: {"sensor_id": 70, "sensor_ts": 1556758807751841, "sensor_0": 2, "sensor_1": 1, "sensor_2": 1, "sensor_3": 48, "sensor_4": 8, "sensor_5": 70, "sensor_6": 15, "sensor_7": 103, "sensor_8": 22, "sensor_9": 1, "sensor_10": 2}
 ```
 
-You can stop the simulator now, with Ctrl+C.
+You can stop the simulator now, with `Ctrl+C`.
 
-
-## Lab 4 - MiNiFi Configuration on the Gateway
-
-MiNiFi is installed on the gateway host. In this lab you will configure and run MiNiFi to read from the mosquitto broker and forward to the NiFi cluster, but it's only in the next lab that you will provide the flow to execute.
-
-**Step 1**: Configure MiNiFi to use Mosquitto API
-
-Download the NiFi MQTT Processor to read from mosquitto
-```
-cd ~
-wget http://central.maven.org/maven2/org/apache/nifi/nifi-mqtt-nar/1.8.0/nifi-mqtt-nar-1.8.0.nar -P /opt/cloudera/cem/minifi/lib
-chown root:root /opt/cloudera/cem/minifi/lib/nifi-mqtt-nar-1.8.0.nar
-chmod 660 /opt/cloudera/cem/minifi/lib/nifi-mqtt-nar-1.8.0.nar
-```
-
-**Step 2**: Start MiNiFi
-
-You can now start the MiNiFi agent
-
-```
-systemctl start minifi
-```
-
-If any issues persist you can check the logs to confirm all is performing as expected, this would be necessary if this agent is not heartbeating back to the Edge Flow Manager (next lab):
-
-```
-cat /opt/cloudera/cem/minifi/logs/minifi-app.log
-```
-
-## Lab 5 - Configuring Edge Flow Management
+## Lab 4 - Configuring Edge Flow Management
 
 [Cloudera Edge Flow Management](https://www.cloudera.com/products/cdf/cem.html) gives you a visual representation of all MiNiFi agents across your enterprise. This allows you to monitor status, update the pipeline configuration for each type of one workflow, and integrates with version control thanks to [**NiFi Registry**](https://nifi.apache.org/registry.html). In this lab, you will create a MiNiFi flow and publish it to the MiNiFi agent to transmit the MQTT messages.
 
@@ -235,16 +192,15 @@ Before we can start tracking workflows in MiNiFi (via EFM) or NiFi we need to co
 - Connect to NiFi Registry: http://public-hostname:18080/nifi-registry
 - Create a New Bucket:
   - Wrench in top right -> Click "New Bucket"
-  - Create a new bucket named "IoT" **<- Case Sensitive!**
+  - Create a new bucket named "iot" **<- Case Sensitive!**
 
-![](./images/efm_admin.png)
-![](./images/image25.png)
+![](./images/nifi_registry.gif)
 
 **Step 2**: EFM Configuration
 
 Open the EFM Web UI at http://public-hostname:10080/efm/ui. Ensure you see your MiNiFi agent's heartbeat messages in the **Events Monitor**.
 
-![](./images/image14.png)
+![](./images/efm_design.gif)
 
 You can then select the **Flow Designer** tab and build the flow. To build a dataflow, select the desired class from the table and click OPEN. Alternatively, you can double-click on the desired class.
 
@@ -255,31 +211,31 @@ Client ID: minifi-iot
 Topic Filter: iot/#
 Max Queue Size = 60
 ```
-![](./images/image9.png)
+![](./images/efm_mqtt.gif)
 
 **Step 3**: Connect MiNiFi and NiFi Communication
 
-Add a _Remote Process Group_ to the canvas and configure it as follows:
-```
-URL = http://<hostname>:8080/nifi
-```
-![](./images/image24.png)
+At this point you need to connect the ConsumerMQTT processor to the RPG, however, you first need the ID of the NiFi entry port. Open NiFi Web UI at http://public-hostname:8080/nifi/ and add an _Input Port_ to the canvas. Call it something like "From MiNiFi" and copy the ID of the input port, as you will soon need it.
 
-At this point you need to connect the ConsumerMQTT processor to the RPG, however, you first need the ID of the NiFi entry port. Open NiFi Web UI at http://public-hostname:8080/nifi/ and add an _Input Port_ to the convas. Call it something like "from Gateway" and copy the ID of the input port, as you will soon need it.
+![](./images/nifi_gateway.gif)
 
-![](./images/image4.png)
-
-To close the NiFI flow - as it is required -, you can temporarly add a _LogAttribute_ processor, and setup 2 connections:
+To close the NiFI flow - as it is required -, you can temporarily add a _LogAttribute_ processor, and setup 2 connections:
 - from the Input Port to LogAttribute;
 - from LogAttribute to itself.
 
 Start the InputPort, but keep the LogAttribute in a stopped state.
 
-![](./images/image26.png)
+![](./images/nifi_logparse.gif)
 
-Back to the Flow Designer, connect the ConsumeMQTT to the RPG. The connection requires an ID and you can paste here the ID you just copied.
+Back to the Flow Designer, add a _Remote Process Group_ to the canvas and configure it as follows:
 
-![](./images/image7.png)
+```
+URL = http://<hostname>:8080/nifi
+```
+
+Once complete, connect the ConsumeMQTT to the RPG via the connection ID copied from the NiFi gateway.
+
+![](./images/efm_rpg.gif)
 
 **Step 4**: EFM Publish to MiNiFi
 
@@ -287,11 +243,11 @@ The MiNiFi flow is now complete and we can publish our workflow to our MiNiFi ag
 - Version the workflow in NiFi Registry
 - Ship the YAML configuration file to the MiNiFi Agent and restart it with the live workflow
 
-![](./images/image21.png)
+![](./images/efm_publish.gif)
 
 If successful, you will see the Flow details in the NiFi Registry.
 
-![](./images/image17.png)
+![](./images/nifi_registry.png)
 
 **Step 5**: Test MiNiFi Agent
 
@@ -301,12 +257,12 @@ At this point, you can test the edge flow up until NiFi. Start the simulator aga
 python mqtt.iot_simulator.py mqtt.iot.config
 ```
 
-![](./images/image29.png)
+![](./images/nifi_live.gif)
 
 
-## Lab 6 - NiFi Workflow and Publish to Kafka
+## Lab 5 - NiFi Workflow and Publish to Kafka
 
-In this lab, you will create a NiFi flow to receive the data from the MiNiFi gateway and push it to **Kafka**.
+In this lab, you will create a NiFi flow to receive the data from the MiNiFi gateway and push it to **Kafka**. The Kafka service and topic name have already been configured and it is now time to Publish our events coming off of the MiNiFi device.
 
 **Step 1**: Publish to Kafka
 
@@ -320,11 +276,12 @@ Use Transactions: False
 
 Connect the Input Port to the PublishKafka processor by dragging the destination of the current connection from the LogAttribute to the PublishKafka. As with the LogAttribute, create a connection from the PublishKafka to itself. Then you can start the Kafka processor.
 
-![](./images/image3.png)
+![](./images/nifi_kafka_config.gif)
+![](./images/nifi_kafka_primary.gif)
 
 You can add more processors as needed to process, split, duplicate or re-route your FlowFiles to all other destinations and processors but for the purpose of this workshop we are complete with the NiFi workflow.
 
-## Lab 7 - CDSW: Experiments and Model Selection
+## Lab 6 - CDSW: Experiments and Model Selection
 
 **STEP 1** : Re-run the Experiment with Different Parameters
 
@@ -337,18 +294,19 @@ NumTrees NumDepth
 20       25
 ```
 
+![](./images/cdsw_experiments_iterate.gif)
+
 When all runs have completed successfully, check which parameters had the best quality (best predictive value). This is represented by the highest ‘area under the curve’, auroc metric.
 
-![](./images/image27.png)
+![](./images/cdsw_experiments_results.png)
 
 **STEP 2** : Save the best model to your environment
 
 Select the run number with the best predictive value, in this case, experiment 2. In the Overview screen of the experiment, you can see that the model in spark format, is captured in the file `iot_model.pkl`. Select this file and hit the **Add to Project** button. This will copy the model to your project directory.
 
-![](./images/image13.png)
-![](./images/image1.png)
+![](./images/cdsw_experiments_pickle.gif)
 
-## Lab 8 - CDSW: Model Deployment
+## Lab 7 - CDSW: Model Deployment
 
 In this section we will deploy the model we selected in the previous lab by utilizing the **Models** section of CDSW.
 
@@ -364,7 +322,7 @@ Before deploying the model, try it out in the Workbench: launch a Python3 engine
 predict({"feature": "0, 65, 0, 137, 21.95, 83, 19.42, 111, 9.4, 6, 3.43, 4"})
 ```
 
-![](./images/image18.png)
+![](./images/cdsw_model_verification.gif)
 
 The functions returns successfully, so we know we can now deploy the model. You can now stop the engine.
 
@@ -383,7 +341,7 @@ Engine:        2 vCPU / 4 GB Memory
 Replicas:      1
 ```
 
-![](./images/image6.png)
+![](./images/cdsw_model_deployment.gif)
 
 If all parameters are set, you can hit the **Deploy Model** button. Wait till the model is deployed. This will take several minutes.
 
@@ -393,9 +351,7 @@ The model should get to the **Deployed** state. Now, click on the Model Name lin
 
 The green color with success is telling that our REST call to the model is technically working. And if you examine the response: `{“result”: 1}`, it returns a 1, which mean that machine with these features is functioning properly.
 
-![](./images/image11.png)
-
-Now, lets change the input parameters and call the predict function again. Put the following values in the Input field:
+Once we have tested the model accepts requests, lets change the input parameters and call the predict function again. Put the following values in the Input field:
 
 ```
 {
@@ -405,8 +361,9 @@ Now, lets change the input parameters and call the predict function again. Put t
 
 With these input parameters, the model returns 0, which mean that the machine is likely to break. Take a note of the **AccessKey** as you will need this for lab 8.
 
+![](./images/cdsw_model_test.gif)
 
-## Lab 9 - Spark Processing
+## Lab 8 - Spark Processing
 
 In this lab we will be using the Spark Streaming processing framework to process the messages streaming into Kafka. This means we will be consuming Kafka messages streaming in from the edge device, sending the contents of that data to the ML Model API, and saving the predictions to Kudu. These predictions tell us whether or not our model anticipates breakage and we will be able to leverage Kudu to analyze these results.
 
@@ -442,7 +399,7 @@ STORED AS KUDU
 TBLPROPERTIES ('kudu.num_tablet_replicas' = '1');
 ```
 
-![](./images/image28.png)
+![](./images/hue_impala_table_creation.gif)
 
 **Step 2**: Create Spark Job
 
@@ -454,16 +411,7 @@ In the second terminal run the following commands:
 
 ```
 sudo su -
-ACCESS_KEY=<put here your cdsw model access key>
-PUBLIC_IP=`curl https://api.ipify.org/`
-mv ~/IoT-predictive-maintenance/spark.iot.py ~
-sed -i "s/YourHostname/`hostname -f`/" spark.iot.py
-sed -i "s/YourCDSWDomain/cdsw.$PUBLIC_IP.nip.io/" spark.iot.py
-sed -i "s/YourAccessKey/$ACCESS_KEY/" spark.iot.py
-wget  http://central.maven.org/maven2/org/apache/kudu/kudu-spark2_2.11/1.9.0/kudu-spark2_2.11-1.9.0.jar
-wget https://raw.githubusercontent.com/swordsmanliu/SparkStreamingHbase/master/lib/spark-core_2.11-1.5.2.logging.jar
-rm -rf ~/.m2 ~/.ivy2/
-spark-submit --master local[2] --jars kudu-spark2_2.11-1.9.0.jar,spark-core_2.11-1.5.2.logging.jar --packages org.apache.spark:spark-streaming-kafka_2.11:1.6.3 spark.iot.py
+~/spark.iot.sh <CDSW model access key>
 ```
 
 **Note**: you might have to use `spark2-submit` if you're running this demo out of a CDH 5 cluster.
@@ -473,7 +421,7 @@ Spark Streaming will flood your screen with log messages, however, at a 5 second
 ![](./images/image20.png)
 
 
-## Lab 10 - Kudu and Impala Analytics
+## Lab 9 - Kudu and Impala Analytics
 
 In this lab, you will run some SQL queries using the Impala engine. You can run a report to inform you which machines are likely to break in the near future.
 
