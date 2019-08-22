@@ -6,6 +6,10 @@ In this workshop, you will build an end-to-end Machine Learning workflow followi
 
 ![](./images/ml_application_process.png)
 
+The architecture we will use to accomplish this in this workshop is as follows.
+
+![](./images/edge2ai_architecture.jpg)
+
 ### Workshop Requirements:
 
 - Basic Hadoop knowledge
@@ -75,19 +79,27 @@ Navigate to the CDSW **Admin** page to fine tune the environment:
    HADOOP_CONF_DIR = /etc/hadoop/conf/
    ```
 
-![](./images/cdsw_variables.png)
+![](./images/cdsw_configuration.gif)
 
 **Note**: this env variable is not required for a CDH 5 cluster.
 
 **STEP 2** : Create the project
 
-Return to the main page and click on **New Project**, using this GitHub project as the source: `https://github.com/phdata/edge2ai-workshop`.
+Return to the main page and click on **New Project**, using this GitHub project as the source:
 
-![](./images/cdsw_new_project.png)
+```
+https://github.com/phdata/edge2ai-workshop
+```
+
+![](./images/cdsw_clone_project.gif)
+
+After cloning and entering the project the first step of the process will be deleting the `images` folder from the repository. This is necessary to ensure Docker builds are small and only exists for reference purposes in the README/walkthrough.
+
+![](./images/cdsw_delete_images.gif)
 
 Now that your project has been created, click on **Open Workbench** and start a Python3 Session with 2 vCPU/ 4 GiB Memory
 
-![](./images/cdsw_create_session.png)
+![](./images/cdsw_create_session.gif)
 
 **NOTE**: Chrome users shouldn't have issues here but IE users have had issues with the interactivity of CDSW because it will look like the workbench is always being created (red line) and never change to an "up" state (green line) without a manual refresh.
 
@@ -143,9 +155,7 @@ From the menu, select `Run -> Run Experiments...`. Now, in the background, the D
 
 **NOTE**: The first run will take 20-30 minutes to build the container it will execute in. It will also not show up until you navigate to the **Experiments** page of CDSW. Please move forward to [Lab 3](#lab---3-gateway-sensors-simulator-and-mqtt-broker) as this process builds.
 
-![](./images/cdsw_run_experiment.png)
-![](./images/cdsw_start_experiment.png)
-
+![](./images/cdsw_run_experiment.gif)
 
 If the Status indicates ‘Running’, you have to wait till the run is completed. In case the status is ‘Build Failed’ or ‘Failed’, check the log information. This is accessible by clicking on the run number of your experiments. There you can find the session log, as well as the build information.
 
@@ -254,7 +264,8 @@ If successful, you will see the Flow details in the NiFi Registry.
 At this point, you can test the edge flow up until NiFi. Start the simulator again and confirm you can see the messages queued in NiFi.
 
 ```
-python mqtt.iot_simulator.py mqtt.iot.config
+sudo su -
+python ~/mqtt.iot_simulator.py ~/mqtt.iot.config
 ```
 
 ![](./images/nifi_live.gif)
@@ -411,6 +422,7 @@ In the second terminal run the following commands:
 
 ```
 sudo su -
+chmod +x ~/spark.iot.sh
 ~/spark.iot.sh <CDSW model access key>
 ```
 
@@ -418,7 +430,7 @@ sudo su -
 
 Spark Streaming will flood your screen with log messages, however, at a 5 seconds interval, you should be able to spot a table: these are the messages that were consumed from Kafka and processed by Spark. Yu can configure Spark for a smaller time window, however, for this exercise 5 seconds is sufficient.
 
-![](./images/image20.png)
+![](./images/spark_streaming_window.png)
 
 
 ## Lab 9 - Kudu and Impala Analytics
@@ -428,12 +440,14 @@ In this lab, you will run some SQL queries using the Impala engine. You can run 
 Login into Hue, and run the following statement in the Impala Query
 
 ```
-select sensor_id, sensor_ts from sensors where is_healthy = 0;
+select sensor_id, sensor_ts from sensors where is_healthy = 0
 ```
 
 Run a few times a SQL statement to count all rows in the table to confirm the latest inserts are always picked up by Impala. This allows you to build real-time reports to act on when it is predicted a machine might break.
 
-![](./images/image5.png)
+![](./images/hue_impala_query.gif)
+
+At this point we have shown how to build an end to end workflow from Edge to AI on top of the tools the Cloudera platform offers. From this point forward the conversation needs to focus on maintaining and refining models like this so that they do not become stale and can provide business value going forward.
 
 ## Appendix
 <details>
