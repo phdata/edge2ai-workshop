@@ -34,24 +34,25 @@ The architecture we will use to accomplish this in this workshop is as follows.
 
 - [Lab 1 - Initial Setup](#lab-1---initial-setup)
 - [Lab 2 - CDSW: Train the model](#lab-2---cdsw-train-the-model)
-- [Lab 3 - Configuring Edge Flow Management](#lab---3-configuring-edge-flow-management)
-- [Lab 4 - NiFi Workflow and Publish to Kafka](#lab---4-nifi-workflow-and-publish-to-kafka)
-- [Lab 5 - CDSW: Experiments and Model Selection](#lab---5-cdsw-experiments-and-model-selection)
-- [Lab 6 - CDSW: Model Deployment](#lab---6-cdsw-model-deployment)
-- [Lab 7 - Spark Processing](#lab---7-spark-processing)
-- [Lab 8 - Kudu and Impala Analytics](#lab---8-kudu-and-impala-analytics)
+- [Lab 3 - Configuring Edge Flow Management](#lab-3---configuring-edge-flow-management)
+- [Lab 4 - NiFi Workflow and Publish to Kafka](#lab-4---nifi-workflow-and-publish-to-kafka)
+- [Lab 5 - CDSW: Experiments and Model Selection](#lab-5---cdsw-experiments-and-model-selection)
+- [Lab 6 - CDSW: Model Deployment](#lab-6---cdsw-model-deployment)
+- [Lab 7 - Spark Processing](#lab-7---spark-processing)
+- [Lab 8 - Kudu and Impala Analytics](#lab-8---kudu-and-impala-analytics)
 
 ## Lab 1 - Initial Setup
 
 1. SSH into the cluster.
 2. Login into the necessary GUI interfaces in separate tabs.
 
-  - Cloudera Manager:  7180 - User: admin Pass: admin
-  - Edge Flow Manager: 10080/efm/ui - No Login
-  - NiFi:              8080/nifi/ - No Login
-  - NiFi Registry:     18080/nifi-registry - No Login
-  - Hue:               8888 - User: admin Pass: admin
-  - CDSW:              cdsw.<vm-public-IP\>.nip.io - Create User admin
+  - **Cloudera Manager**:  7180 - User: admin Pass: admin
+  - **Edge Flow Manager**: 10080/efm/ui - No Login
+  - **NiFi**:              8080/nifi/ - No Login
+  - **NiFi Registry**:     18080/nifi-registry - No Login
+  - **Hue**:               8888 - User: admin Pass: admin
+  - **CDSW**:              cdsw.<vm-public-IP\>.nip.io - Create User admin
+  - **Apache Superset**:   8090 - User: admin Pass: admin
 
 The **Cloudera Manager** login is the default credentials when CM is first started (admin/admin).
 
@@ -152,7 +153,7 @@ numTrees = 20 numDepth = 20
 ```
 From the menu, select `Run -> Run Experiments...`. Now, in the background, the Data Science Workbench environment will spin up a new docker container, where this program will run.
 
-**NOTE**: The first run will take 20-30 minutes to build the container it will execute in. It will also not show up until you navigate to the **Experiments** page of CDSW. Please move forward to [Lab 3](#lab---3-configuring-edge-flow-management) as this process builds.
+**NOTE**: The first run will take 20-30 minutes to build the container it will execute in. It will also not show up until you navigate to the **Experiments** page of CDSW. Please move forward to [Lab 3](#lab-3---configuring-edge-flow-management) as this process builds.
 
 ![](./images/cdsw_run_experiment.gif)
 
@@ -392,17 +393,37 @@ At this point we have shown how to build an end to end workflow from Edge to AI 
 
 ## Lab 9 - NiFi Stream Processing
 
-Create a Process Group
+The previous labs have demonstrated how to use all of the tools and how to interact with them via Spark code. This is great for teams with development backgrounds but for teams that would rather accomplish this via configuration it is also possible to accomplish this via NiFi processing. This section will call a custom built pipeline to call everything used previously using only configurations.
 
-Install the CDSW Rest API template
+**Step 1** - Create a NiFi Process Group and Load Template
 
-Update the CDSW API Code in UpdateAttribute processor
+We want to separate our processing from the rest of our NiFi flow. This ensures specific processes are grouped together for easier management. Once the processing group is created we will add a template into the processing group to ensure our NiFi workload is loaded.
 
-Update the CDSW HTTP endpoint in InvokeHTTP processor
+![](./images/nifi_processing_group.gif)
 
-Enable Controller Services
+**Step 2** - Enable Controller Services
 
-Start NiFi processes
+After the template has been loaded we need to enable the Controller Services to ensure they are active. These were loaded as part of the template and are not enabled by default.
+
+![](./images/nifi_enable_controller_services.gif)
+
+**Step 3** - Update the CDSW API Code in UpdateAttribute processor
+
+CDSW generates an API key for each model that is deployed in order to ensure message traffic is routed correctly and security can be followed. This API key needs to be updated to match the model deployed for it to correctly score the data being generated from the edge device.
+
+![](./images/nifi_cdsw_api_key.gif)
+
+**Step 4** - Update the CDSW HTTP endpoint in InvokeHTTP processor
+
+Similar to the API key, the CDSW model HTTP endpoint has a different hostname for each deployment. We need to pick the correct endpoint and update it in our NiFi configurations.
+
+![](./images/nifi_cdsw_api_http.gif)
+
+**Step 5** - Start NiFi processes
+
+We are now at the point where we can turn on the NiFi processes, this needs to be done for everything in the yellow and blue boxes (the gray box isn't required).
+
+![](./images/nifi_process_start.gif)
 
 ## Lab 10 - Superset Dashboard
 
@@ -411,6 +432,8 @@ Navigate to the Superset server to pull up the dashboard for watching the Spark 
 ```
 http://<public_hostname>:8089/dashboard/list/
 ```
+
+![](./images/superset_dashboard.gif)
 
 ## Appendix
 <details>
