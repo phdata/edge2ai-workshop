@@ -40,10 +40,12 @@ The architecture we will use to accomplish this in this workshop is as follows.
 - [Lab 6 - CDSW: Model Deployment](#lab-6---cdsw-model-deployment)
 - [Lab 7 - Spark Processing](#lab-7---spark-processing)
 - [Lab 8 - Kudu and Impala Analytics](#lab-8---kudu-and-impala-analytics)
+- [Lab 9 - NiFi Stream Processing](#lab-9---nifi-stream-processing)
+- [Lab 10 - Superset Dashboard](#lab-10---superset-dashboard)
 
 ## Lab 1 - Initial Setup
 
-1. SSH into the cluster.
+1. SSH into the cluster (IP and Port will be shared via email after Workshop registration).
 2. Login into the necessary GUI interfaces in separate tabs.
 
   - **Cloudera Manager**:  7180 - User: admin Pass: admin
